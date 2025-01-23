@@ -1,7 +1,8 @@
+// src/api/axios.js
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://localhost:7108', // Update with your API URL
+  baseURL: 'https://localhost:7108',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -12,15 +13,27 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
-    console.log('API Request - Token:', token); // Debug
+    console.log('API Request - Token:', token);
+    
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('API Request Config:', config); // Debug
+    
+    // Log the full request configuration
+    console.log('API Request:', {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      data: config.data
+    });
+    
     return config;
   },
   (error) => {
-    console.error('API Request Error:', error); // Debug
+    console.error('API Request Error:', {
+      message: error.message,
+      config: error.config
+    });
     return Promise.reject(error);
   }
 );
@@ -28,16 +41,26 @@ api.interceptors.request.use(
 // Response interceptor
 api.interceptors.response.use(
   (response) => {
-    console.log('API Response:', response); // Debug
+    console.log('API Response Success:', {
+      status: response.status,
+      data: response.data,
+      headers: response.headers
+    });
     return response;
   },
   (error) => {
-    console.error('API Response Error:', error); // Debug
+    console.error('API Response Error:', {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+      config: error.config
+    });
+
     if (error.response?.status === 401) {
-      console.log('Unauthorized access, clearing token'); // Debug
       localStorage.removeItem('token');
       window.location.href = '/login';
     }
+    
     return Promise.reject(error);
   }
 );

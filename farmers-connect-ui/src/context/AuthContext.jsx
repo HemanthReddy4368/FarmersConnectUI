@@ -1,3 +1,4 @@
+// src/context/AuthContext.jsx
 import { createContext, useState, useContext, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
@@ -11,7 +12,8 @@ export const AuthProvider = ({ children }) => {
     return {
       name: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
       email: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'],
-      id: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']
+      id: decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
+      role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
     };
   };
 
