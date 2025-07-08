@@ -10,6 +10,9 @@ import Weather from './pages/Weather';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import Admin from './pages/Admin';
+import FarmManagement from './pages/FarmManagement';
+import AllFarms from './pages/AllFarms';
+import FarmCrops from './pages/FarmCrops';
 
 function App() {
   return (
@@ -22,9 +25,9 @@ function App() {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 mt-14"> {/* Reduced from mt-16 to mt-14 */}
-            <div className="min-h-[calc(100vh-3.5rem)] bg-gradient-to-br from-gray-50 to-gray-100"> {/* Adjusted from 4rem to 3.5rem */}
-              <div className="mx-1 px-3 sm:px-4 lg:px-6 py-4"> {/* Reduced padding */}
+          <div className="flex-1 mt-14">
+            <div className="min-h-[calc(100vh-3.5rem)] bg-gradient-to-br from-gray-50 to-gray-100">
+              <div className="mx-1 px-3 sm:px-4 lg:px-6 py-4">
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/login" element={<Login />} />
@@ -58,6 +61,30 @@ function App() {
                     element={
                       <ProtectedRoute>
                         <Admin />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/farm-management"
+                    element={
+                      <ProtectedRoute>
+                        <FarmManagement />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/all-farms"
+                    element={
+                      <ProtectedRoute>
+                        <AllFarms />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/farm/:farmId/crops"
+                    element={
+                      <ProtectedRoute>
+                        <FarmCrops />
                       </ProtectedRoute>
                     }
                   />

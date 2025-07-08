@@ -14,6 +14,10 @@ import {
   XMarkIcon as XIcon,
   ShieldCheckIcon,
   ChevronDownIcon,
+  BuildingOfficeIcon,
+  BuildingStorefrontIcon,
+  ShoppingBagIcon,
+  ClipboardDocumentListIcon
 } from '@heroicons/react/24/outline';
 
 
@@ -72,17 +76,45 @@ const Navbar = () => {
     </Link>
   );
 
+  // In Navbar.jsx, update the getRoleSpecificNavItems function
   const getRoleSpecificNavItems = () => {
     if (!user) return null;
-
+  
     const roleLinks = {
-      [ROLES.FARMER]: { to: '/farmer-dashboard', label: 'Farmer Dashboard' },
-      [ROLES.BUYER]: { to: '/marketplace', label: 'Marketplace' },
-      [ROLES.WORKER]: { to: '/work-orders', label: 'Work Orders' },
+      [ROLES.FARMER]: [
+        { to: '/farmer-dashboard', label: 'Farmer Dashboard', icon: HomeIcon },
+        { to: '/farm-management', label: 'Farm Management', icon: BuildingOfficeIcon }
+      ],
+      [ROLES.BUYER]: { 
+        to: '/marketplace', 
+        label: 'Marketplace', 
+        icon: ShoppingBagIcon 
+      },
+      [ROLES.WORKER]: { 
+        to: '/work-orders', 
+        label: 'Work Orders', 
+        icon: ClipboardDocumentListIcon 
+      },
+      [ROLES.ADMIN]: [
+        { to: '/all-farms', label: 'All Farms', icon: BuildingStorefrontIcon }
+      ]
     };
-
+  
     const roleLink = roleLinks[user.role];
-    return roleLink ? <NavLink to={roleLink.to}>{roleLink.label}</NavLink> : null;
+  
+    if (Array.isArray(roleLink)) {
+      return roleLink.map((link, index) => (
+        <NavLink key={index} to={link.to} icon={link.icon}>
+          {link.label}
+        </NavLink>
+      ));
+    }
+  
+    return roleLink ? (
+      <NavLink to={roleLink.to} icon={roleLink.icon}>
+        {roleLink.label}
+      </NavLink>
+    ) : null;
   };
 
   return (
@@ -152,15 +184,25 @@ const Navbar = () => {
                       <CogIcon className="h-5 w-5 mr-2" />
                       Settings
                     </Link>
-                    {user.role === ROLES.ADMIN && (
+                    {user.role === ROLES.FARMER && (
                       <Link
-                        to="/admin"
+                        to="/farm-management"
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
                         onClick={() => setDropdownOpen(false)}
                       >
-                        <ShieldCheckIcon className="h-5 w-5 mr-2" />
-                        Admin Panel
+                        <BuildingOfficeIcon className="h-5 w-5 mr-2" />
+                        Farm Management
                       </Link>
+                    )}
+                    {user.role === ROLES.ADMIN && (
+                        <Link
+                          to="/admin"
+                          className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          onClick={() => setDropdownOpen(false)}
+                        >
+                          <ShieldCheckIcon className="h-5 w-5 mr-2" />
+                          Admin Panel
+                        </Link>
                     )}
                     <button
                       onClick={handleLogout}
@@ -209,6 +251,18 @@ const Navbar = () => {
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1">
             <NavLink to="/" icon={HomeIcon}>Home</NavLink>
+            {user?.role === ROLES.FARMER && (
+              <>
+                <NavLink to="/farmer-dashboard" icon={HomeIcon}>Farmer Dashboard</NavLink>
+                <NavLink to="/farm-management" icon={BuildingOfficeIcon}>Farm Management</NavLink>
+              </>
+            )}
+            {user?.role === ROLES.ADMIN && (
+              <>
+                <NavLink to="/admin" icon={ShieldCheckIcon}>Admin Panel</NavLink>
+                <NavLink to="/all-farms" icon={BuildingStorefrontIcon}>All Farms</NavLink>
+              </>
+            )}
             <NavLink to="/weather" icon={CloudIcon}>Weather</NavLink>
             {getRoleSpecificNavItems()}
             {!user && (
