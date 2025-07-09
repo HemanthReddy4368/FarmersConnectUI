@@ -5,12 +5,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { ArrowLeftIcon, CalendarIcon, CheckIcon, ChevronRightIcon } from '@heroicons/react/24/outline'; // <-- FIXED: Added ChevronRightIcon
 import { GiPlantSeed, GiSprout, GiTomato, GiCorn, GiWheat, GiWateringCan } from 'react-icons/gi';
+import { GiPayMoney } from 'react-icons/gi';
 
 const CROP_STAGES = [
-    { id: 1, name: 'Planted', icon: <GiPlantSeed className="h-8 w-8"/> },
-    { id: 2, name: 'Growing', icon: <GiSprout className="h-8 w-8"/> },
-    { id: 3, name: 'Ready to Harvest', display: 'Ready', icon: <GiTomato className="h-8 w-8"/> },
-    { id: 4, name: 'Harvested', icon: <GiWheat className="h-8 w-8"/> }
+    { id: 1, name: 'Planted', icon: <GiPlantSeed className="h-8 w-8" /> },
+    { id: 2, name: 'Growing', icon: <GiSprout className="h-8 w-8" /> },
+    { id: 3, name: 'Ready to Harvest', display: 'Ready', icon: <GiTomato className="h-8 w-8" /> },
+    { id: 4, name: 'Harvested', icon: <GiWheat className="h-8 w-8" /> }
 ];
 
 const CropDetail = () => {
@@ -106,7 +107,7 @@ const CropDetail = () => {
                         <div className="mt-8 text-center">
                             <button onClick={handleUpdateStatus} className="inline-flex items-center px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors">
                                 Advance to "{CROP_STAGES[currentStageIndex + 1].name}"
-                                <ChevronRightIcon className="h-5 w-5 ml-2"/>
+                                <ChevronRightIcon className="h-5 w-5 ml-2" />
                             </button>
                         </div>
                     )}
@@ -116,14 +117,31 @@ const CropDetail = () => {
                     <div className="bg-white rounded-xl shadow-lg p-6">
                         <h3 className="text-xl font-bold text-gray-800 mb-4">Key Dates</h3>
                         <div className="space-y-3">
-                            <div className="flex items-center text-gray-700"><CalendarIcon className="h-5 w-5 mr-3 text-green-500"/>Planted On: <span className="font-semibold ml-2">{new Date(crop.plantingDate).toLocaleDateString()}</span></div>
-                            <div className="flex items-center text-gray-700"><CalendarIcon className="h-5 w-5 mr-3 text-red-500"/>Expected Harvest: <span className="font-semibold ml-2">{new Date(crop.harvestDate).toLocaleDateString()}</span></div>
+                            <div className="flex items-center text-gray-700"><CalendarIcon className="h-5 w-5 mr-3 text-green-500" />Planted On: <span className="font-semibold ml-2">{new Date(crop.plantingDate).toLocaleDateString()}</span></div>
+                            <div className="flex items-center text-gray-700"><CalendarIcon className="h-5 w-5 mr-3 text-red-500" />Expected Harvest: <span className="font-semibold ml-2">{new Date(crop.harvestDate).toLocaleDateString()}</span></div>
                         </div>
                     </div>
-                     <div className="bg-white rounded-xl shadow-lg p-6">
+                    <div className="bg-white rounded-xl shadow-lg p-6">
                         <h3 className="text-xl font-bold text-gray-800 mb-4">Yield Information</h3>
                         <div className="space-y-3">
-                            <div className="flex items-center text-gray-700"><GiWheat className="h-5 w-5 mr-3 text-yellow-600"/>Estimated Yield: <span className="font-semibold ml-2">{crop.yieldEstimate} kg</span></div>
+                            <div className="flex items-center text-gray-700"><GiWheat className="h-5 w-5 mr-3 text-yellow-600" />Estimated Yield: <span className="font-semibold ml-2">{crop.yieldEstimate} kg</span></div>
+                        </div>
+                    </div>
+                    <div className="mt-6">
+                        <div className="bg-white rounded-xl shadow-lg p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-800">Financials</h3>
+                                    <p className="text-gray-500">Track expenses and calculate profitability.</p>
+                                </div>
+                                <button
+                                    onClick={() => navigate(`/farm/${farmId}/crop/${cropId}/analysis`)}
+                                    className="inline-flex items-center px-6 py-3 bg-gray-800 text-white font-semibold rounded-lg shadow-md hover:bg-black transition-colors"
+                                >
+                                    <GiPayMoney className="h-5 w-5 mr-2" />
+                                    View Analysis
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

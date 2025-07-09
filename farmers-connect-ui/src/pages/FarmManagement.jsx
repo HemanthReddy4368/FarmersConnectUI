@@ -10,10 +10,9 @@ import {
   MapPinIcon,
   CubeIcon,
   ChevronRightIcon,
-  XMarkIcon,
-  ExclamationTriangleIcon
+  XMarkIcon
 } from '@heroicons/react/24/outline';
-import { GiBarn, GiSprout, GiFarmer } from 'react-icons/gi'; // Using react-icons for better visuals
+import { GiBarn, GiSprout, GiFarmer, GiMoneyStack } from 'react-icons/gi'; // Added GiMoneyStack
 
 const FarmManagement = () => {
   const { user } = useAuth();
@@ -27,6 +26,7 @@ const FarmManagement = () => {
     totalFarms: 0,
     totalArea: 0,
     activeCrops: 0,
+    totalExpenses: 0, // <-- Added new stat
   });
   const [formData, setFormData] = useState({
     farmName: '',
@@ -39,28 +39,45 @@ const FarmManagement = () => {
     if (!user) return;
     setLoading(true);
     try {
+      // 1. Fetch all farms for the user
       const farmResponse = await api.get(`/api/Farm/user/${user.id}`);
       const userFarms = farmResponse.data.farms || [];
-      setFarms(userFarms);
+      
+      if (userFarms.length === 0) {
+        setFarms([]);
+        setFarmStats({ totalFarms: 0, totalArea: 0, activeCrops: 0, totalExpenses: 0 });
+        setLoading(false);
+        return;
+      }
 
-      // Fetch crops for each farm to calculate stats
+      // 2. Fetch all crops for all farms
       const cropPromises = userFarms.map(farm => api.get(`/api/Crop/farm/${farm.farmId}`));
       const cropResults = await Promise.all(cropPromises);
       
-      let totalCrops = 0;
+      const allCrops = cropResults.flatMap(res => res.data.crops || []);
+
+      // 3. Fetch all expenses for all crops
+      let totalExpenses = 0;
+      if (allCrops.length > 0) {
+          const expensePromises = allCrops.map(crop => api.get(`/api/crop/${crop.cropId}/expense`));
+          const expenseResults = await Promise.all(expensePromises);
+          const allExpenses = expenseResults.flatMap(res => res.data || []);
+          totalExpenses = allExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+      }
+
+      // 4. Add crop count to each farm for display on the card
       const farmsWithCropCount = userFarms.map((farm, index) => {
         const crops = cropResults[index].data.crops || [];
-        totalCrops += crops.length;
         return { ...farm, cropCount: crops.length };
       });
-      
       setFarms(farmsWithCropCount);
 
-      // Calculate overall stats
+      // 5. Calculate and set final stats
       const stats = {
         totalFarms: userFarms.length,
         totalArea: userFarms.reduce((sum, farm) => sum + Number(farm.size), 0),
-        activeCrops: totalCrops,
+        activeCrops: allCrops.length,
+        totalExpenses: totalExpenses,
       };
       setFarmStats(stats);
 
@@ -78,6 +95,7 @@ const FarmManagement = () => {
     fetchFarmsAndStats();
   }, [fetchFarmsAndStats]);
 
+  // --- All other handler functions (handleOpenModal, handleSubmit, etc.) remain the same ---
   const handleOpenModal = (farm = null) => {
     if (farm) {
       setEditingFarm(farm);
@@ -140,6 +158,7 @@ const FarmManagement = () => {
     }
   };
 
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
@@ -151,20 +170,19 @@ const FarmManagement = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
         <header className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800">Farmer's Dashboard</h1>
-          <p className="text-lg text-gray-500 mt-1">Welcome back, {user?.name}! Here's an overview of your operations.</p>
+          <p className="text-lg text-gray-500 mt-1">Welcome back, {user?.name}! Here's your business overview.</p>
         </header>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Updated Stats Overview with 4 cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
             <StatCard icon={<GiBarn className="h-8 w-8 text-white"/>} title="Total Farms" value={farmStats.totalFarms} color="from-blue-500 to-blue-400" />
-            <StatCard icon={<CubeIcon className="h-8 w-8 text-white"/>} title="Total Area" value={`${farmStats.totalArea} acres`} color="from-green-500 to-green-400" />
-            <StatCard icon={<GiSprout className="h-8 w-8 text-white"/>} title="Total Crops" value={farmStats.activeCrops} color="from-yellow-500 to-yellow-400" />
+            <StatCard icon={<CubeIcon className="h-8 w-8 text-white"/>} title="Total Area" value={`${farmStats.totalArea} acres`} color="from-purple-500 to-purple-400" />
+            <StatCard icon={<GiSprout className="h-8 w-8 text-white"/>} title="Active Crops" value={farmStats.activeCrops} color="from-green-500 to-green-400" />
+            <StatCard icon={<GiMoneyStack className="h-8 w-8 text-white"/>} title="Overall Expenses" value={`₹${farmStats.totalExpenses.toFixed(2)}`} color="from-red-500 to-red-400" />
         </div>
 
-        {/* Farms Section */}
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-800">My Farms</h2>
           <button onClick={() => handleOpenModal()} className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg shadow-sm hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
@@ -201,7 +219,7 @@ const FarmManagement = () => {
   );
 };
 
-// Helper components for a cleaner structure
+// --- Helper Components (StatCard, FarmCard, FarmModal) remain the same ---
 
 const StatCard = ({ icon, title, value, color }) => (
     <div className={`bg-gradient-to-br ${color} text-white rounded-xl shadow-lg p-6 flex items-center`}>
@@ -209,7 +227,7 @@ const StatCard = ({ icon, title, value, color }) => (
             {icon}
         </div>
         <div className="ml-4">
-            <p className="text-lg font-medium text-green-50">{title}</p>
+            <p className="text-lg font-medium opacity-80">{title}</p>
             <p className="text-3xl font-bold">{value}</p>
         </div>
     </div>
@@ -223,7 +241,6 @@ const FarmCard = ({ farm, onEdit, onDelete, navigate }) => (
         <div className="p-6">
             <h3 className="text-xl font-bold text-gray-800">{farm.farmName}</h3>
             <p className="text-gray-500 flex items-center mt-1"><MapPinIcon className="h-4 w-4 mr-2 text-gray-400"/>{farm.location}</p>
-            
             <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                 <div className="font-medium text-gray-700">Size: <span className="font-normal text-gray-500">{farm.size} acres</span></div>
                 <div className="font-medium text-gray-700">Soil: <span className="font-normal text-gray-500">{farm.soilType}</span></div>
@@ -232,12 +249,8 @@ const FarmCard = ({ farm, onEdit, onDelete, navigate }) => (
         </div>
         <div className="bg-gray-50 px-6 py-4 flex justify-between items-center">
              <div className="flex space-x-2">
-                <button onClick={() => onEdit(farm)} className="p-2 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-200 transition-colors" title="Edit Farm">
-                    <PencilIcon className="h-5 w-5"/>
-                </button>
-                <button onClick={() => onDelete(farm.farmId)} className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-200 transition-colors" title="Delete Farm">
-                    <TrashIcon className="h-5 w-5"/>
-                </button>
+                <button onClick={(e) => { e.stopPropagation(); onEdit(farm); }} className="p-2 text-gray-400 hover:text-blue-500 rounded-full hover:bg-gray-200 transition-colors" title="Edit Farm"><PencilIcon className="h-5 w-5"/></button>
+                <button onClick={(e) => { e.stopPropagation(); onDelete(farm.farmId); }} className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-200 transition-colors" title="Delete Farm"><TrashIcon className="h-5 w-5"/></button>
              </div>
             <button onClick={() => navigate(`/farm/${farm.farmId}/crops`)} className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-green-700 transition-colors">
                 Manage Crops <ChevronRightIcon className="h-4 w-4 ml-1"/>
@@ -251,9 +264,7 @@ const FarmModal = ({ farm, onClose, onSubmit, formData, setFormData }) => (
         <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full">
             <div className="p-6 border-b border-gray-200 flex justify-between items-center">
                 <h2 className="text-2xl font-bold text-gray-800">{farm ? 'Edit Farm' : 'Add New Farm'}</h2>
-                <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100">
-                    <XMarkIcon className="h-6 w-6 text-gray-500" />
-                </button>
+                <button onClick={onClose} className="p-2 rounded-full hover:bg-gray-100"><XMarkIcon className="h-6 w-6 text-gray-500" /></button>
             </div>
             <form onSubmit={onSubmit} className="p-6 space-y-4">
                 <div>

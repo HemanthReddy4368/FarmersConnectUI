@@ -14,7 +14,8 @@ import FarmManagement from './pages/FarmManagement';
 import AllFarms from './pages/AllFarms';
 import FarmCrops from './pages/FarmCrops';
 import CropDetail from './pages/CropDetail';
-
+import CropAnalysis from './pages/CropAnalysis';
+import ExpensesDashboard from './pages/ExpensesDashboard';
 function App() {
   return (
     <AuthProvider>
@@ -90,6 +91,8 @@ function App() {
                     }
                   />
                   <Route path="/farm/:farmId/crop/:cropId" element={<ProtectedRoute><CropDetail /></ProtectedRoute>} />
+                  <Route path="/farm/:farmId/crop/:cropId/analysis" element={<ProtectedRoute><CropAnalysis /></ProtectedRoute>} />
+                  <Route path="/expenses" element={<ProtectedRoute><ExpensesDashboard /></ProtectedRoute>} />
                 </Routes>
               </div>
             </div>
