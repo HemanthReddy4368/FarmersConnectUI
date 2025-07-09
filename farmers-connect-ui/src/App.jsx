@@ -13,6 +13,7 @@ import Admin from './pages/Admin';
 import FarmManagement from './pages/FarmManagement';
 import AllFarms from './pages/AllFarms';
 import FarmCrops from './pages/FarmCrops';
+import CropDetail from './pages/CropDetail';
 
 function App() {
   return (
@@ -88,6 +89,7 @@ function App() {
                       </ProtectedRoute>
                     }
                   />
+                  <Route path="/farm/:farmId/crop/:cropId" element={<ProtectedRoute><CropDetail /></ProtectedRoute>} />
                 </Routes>
               </div>
             </div>
