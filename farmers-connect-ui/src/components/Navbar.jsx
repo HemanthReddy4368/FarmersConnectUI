@@ -16,7 +16,8 @@ import {
   BuildingOfficeIcon,
   BuildingStorefrontIcon,
   ShoppingBagIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  CurrencyBangladeshiIcon 
 } from '@heroicons/react/24/outline';
 
 const Navbar = () => {
@@ -76,6 +77,8 @@ const Navbar = () => {
         // Simplified: The "Home" link now serves as the main dashboard link.
         // We only add extra, non-dashboard links here.
         switch (user.role) {
+            case ROLES.FARMER:
+                return <NavLink to="/expenses" icon={CurrencyBangladeshiIcon}>Expenses</NavLink>; 
             case ROLES.ADMIN:
                 return <NavLink to="/all-farms" icon={BuildingStorefrontIcon}>All Farms</NavLink>;
             case ROLES.BUYER:
